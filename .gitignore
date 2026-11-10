@@ -9,3 +9,6 @@ yarppg_ubfc.csv
 
 # Personal webcam recordings (your own heart-rate data)
 signal*.csv
+
+# analyze.py output (overwritten every run; README uses docs/ instead)
+/analysis*.png

@@ -52,14 +52,36 @@ show **agreement between methods**, not error against a finger sensor.
 | All 3 regions give the same bpm | 5 of 6 subjects (6th within 9 bpm) |
 | [yarPPG](https://github.com/SamProell/yarppg) green within 5 bpm of my POS | 5 of 6 |
 
-On clean video, the pulse is clearly there.
+On clean video, the pulse is clearly there. Here is UBFC subject 3: all three regions peak at
+**93 bpm**, and their coherence at that frequency is 0.89–0.96 (1 = identical rhythm):
+
+![POS pulse from forehead and both cheeks on a clean UBFC video](docs/pulse_clean_video.png)
+
+*Top: the filtered pulse waves move together. Middle: one shared spike in the spectrum.
+Bottom: coherence between regions, high around the heart rate. On DFDC and FaceForensics++
+videos, these plots usually show three different peaks instead.*
 
 ### 3. Compressed web video: DFDC sample ❌
 
 | | Result |
 |---|---|
 | Real videos where the 3 regions agree (within 12 bpm) | 16% |
-| Detector (whole-face masks) | 55.8% balanced accuracy, AUC 0.59 |
+| Detector (whole-face masks) | 55.8% balanced accuracy, AUC 0.59, macro F1 0.51 |
+
+398 videos (321 fake, 77 real):
+
+| | called real | called fake |
+|---|---|---|
+| **really real** | 41 | 36 |
+| **really fake** | 134 | 187 |
+
+| Class | Precision | Recall | F1 |
+|---|---|---|---|
+| fake | 0.84 | 0.58 | 0.69 |
+| real | 0.23 | 0.53 | 0.33 |
+
+The fake precision of 0.84 looks good but is misleading: 81% of the videos are fake, so
+almost any "fake" guess is right. The real-class numbers show the model can't tell them apart.
 
 DFDC clips are short (10 s), heavily compressed and show small faces. The pulse doesn't survive,
 so a detector can't use a "missing pulse".
@@ -68,16 +90,32 @@ so a detector can't use a "missing pulse".
 
 50 real videos (25 groups of people) plus 50 fakes per method:
 
-| Fakes | Quality | Balanced accuracy | AUC |
-|---|---|---|---|
-| Deepfakes | raw | **69%** | 0.78 |
-| Deepfakes | c23 | 63% | 0.69 |
-| Face2Face | c23 | **70%** | 0.74 |
-| FaceSwap | c23 | 55% | 0.56 |
-| NeuralTextures | c23 | 51% | 0.54 |
-| All four together | c23 | 53% | 0.55 |
+| Fakes | Quality | Balanced accuracy | AUC | Macro F1 |
+|---|---|---|---|---|
+| Deepfakes | raw | **69%** | **0.78** | **0.69** |
+| Deepfakes | c23 | 63% | 0.69 | 0.63 |
+| Face2Face | c23 | **70%** | 0.74 | **0.70** |
+| FaceSwap | c23 | 55% | 0.56 | 0.55 |
+| NeuralTextures | c23 | 51% | 0.54 | 0.51 |
+| All four together | c23 | 53% | 0.55 | 0.49 |
 
-50% = coin flip. With only 25 groups, each number is uncertain by roughly ±10%.
+50% (or F1 0.5) = coin flip. With only 25 groups, each number is uncertain by roughly ±10%.
+
+Confusion matrices and per-class scores (rows = truth, columns = prediction):
+
+| Fakes | Really real → called real / fake | Really fake → called real / fake | Fake P / R / F1 | Real P / R / F1 |
+|---|---|---|---|---|
+| Deepfakes, raw | 34 / 16 | 15 / 35 | 0.69 / 0.70 / 0.69 | 0.69 / 0.68 / 0.69 |
+| Deepfakes, c23 | 30 / 20 | 17 / 33 | 0.62 / 0.66 / 0.64 | 0.64 / 0.60 / 0.62 |
+| Face2Face, c23 | 34 / 16 | 14 / 36 | 0.69 / 0.72 / 0.71 | 0.71 / 0.68 / 0.69 |
+| FaceSwap, c23 | 28 / 22 | 23 / 27 | 0.55 / 0.54 / 0.55 | 0.55 / 0.56 / 0.55 |
+| NeuralTextures, c23 | 26 / 24 | 25 / 25 | 0.51 / 0.50 / 0.51 | 0.51 / 0.52 / 0.51 |
+| All four, c23 | 24 / 26 | 84 / 116 | 0.82 / 0.58 / 0.68 | 0.22 / 0.48 / 0.30 |
+
+P = precision (of the videos called this class, how many really were), R = recall (of this
+class, how many were caught), F1 = their combination. Both classes are reported because with
+imbalanced data, like "all four" (200 fakes to 50 reals), the fake-class numbers alone look far
+better than the model really is.
 
 ## What I learned
 

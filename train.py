@@ -20,7 +20,8 @@ from pathlib import Path
 import numpy as np
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import balanced_accuracy_score, confusion_matrix, roc_auc_score
+from sklearn.metrics import (balanced_accuracy_score, confusion_matrix, f1_score,
+                             precision_score, recall_score, roc_auc_score)
 from sklearn.model_selection import GroupKFold
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
@@ -111,6 +112,18 @@ def main():
     print("\n  videos        called real  called fake")
     print(f"  really real   {tn:11d}  {fp:11d}")
     print(f"  really fake   {fn:11d}  {tp:11d}")
+
+    # Precision: of the videos called fake, how many really were.
+    # Recall: of the fake videos, how many were caught.
+    # F1: one number combining the two. Reported for each class, because with
+    # many more fakes than reals the "fake" numbers alone look too good.
+    print("\n  class   precision  recall   F1")
+    for label, cls in (("fake", 1), ("real", 0)):
+        p, r, f = (s(video_true, video_pred, pos_label=cls, zero_division=0)
+                   for s in (precision_score, recall_score, f1_score))
+        print(f"  {label:6s} {p:9.2f} {r:7.2f} {f:5.2f}")
+    print(f"  macro F1 (average of both): {f1_score(video_true, video_pred, average='macro'):.2f}")
+
     print("\n  Balanced accuracy: average of 'reals called real' and 'fakes called fake'.")
     print("  50% = coin flip.  AUC: 0.5 = coin flip, 1.0 = perfect.")
 
