@@ -1,0 +1,11 @@
+# Python environments and caches
+.venv/
+.venv-yarppg/
+__pycache__/
+
+# Signals extracted from datasets (their licences don't allow sharing derived data)
+signals*/
+yarppg_ubfc.csv
+
+# Personal webcam recordings (your own heart-rate data)
+signal*.csv
